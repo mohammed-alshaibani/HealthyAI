@@ -1,3 +1,7 @@
+<img width="5009" height="10513" alt="diagram (2)" src="https://github.com/user-attachments/assets/6e107287-e75f-48b3-86f8-383b0a75cf49" />
+
+
+
 # HealTrip AI — Patient Decision Assistant
 
 A clean engineering prototype of an AI-powered Patient Decision Assistant that helps patients find doctors and hospitals in Saudi Arabia. 
