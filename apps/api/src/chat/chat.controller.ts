@@ -2,7 +2,9 @@ import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { z } from 'zod';
 import { checkSafety } from '../safety/safety.service';
-import { runAgent } from '../agent/agent';
+import { runAgent, toolRegistry } from '../agent/agent';
+import OpenAI from 'openai';
+import { env } from '../lib/env';
 
 const messageSchema = z.object({
   role: z.enum(['user', 'assistant']),
@@ -46,7 +48,11 @@ chatRouter.post('/chat', async (req: Request, res: Response) => {
     }
 
     // Run the AI agent
-    const result = await runAgent(input.messages);
+    const openai = new OpenAI({ 
+      apiKey: env.LLM_API_KEY,
+      baseURL: env.LLM_BASE_URL 
+    });
+    const result = await runAgent(input.messages, openai, toolRegistry);
 
     res.json({
       conversationId,
