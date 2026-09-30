@@ -23,36 +23,42 @@ export interface AgentResult {
   message: string;
 }
 
-/** Validate and execute a single tool call, returning a JSON string for the LLM */
-async function executeTool(name: string, rawArgs: string): Promise<string> {
-  try {
-    const args = JSON.parse(rawArgs);
+export type ToolExecutor = (rawArgs: string) => Promise<string>;
 
-    switch (name) {
-      case 'search_doctors': {
-        const validated = searchDoctorsSchema.parse(args);
-        const results = await searchDoctors(validated);
-        return JSON.stringify({ results, count: results.length });
-      }
-      case 'search_hospitals': {
-        const validated = searchHospitalsSchema.parse(args);
-        const results = await searchHospitals(validated);
-        return JSON.stringify({ results, count: results.length });
-      }
-      default:
-        return JSON.stringify({ error: `Unknown tool: ${name}` });
+export const toolRegistry: Record<string, ToolExecutor> = {
+  search_doctors: async (rawArgs: string) => {
+    try {
+      const args = JSON.parse(rawArgs);
+      const validated = searchDoctorsSchema.parse(args);
+      const results = await searchDoctors(validated);
+      return JSON.stringify({ results, count: results.length });
+    } catch {
+      return JSON.stringify({
+        error:
+          'Tool execution failed. Provider information is temporarily unavailable.',
+      });
     }
-  } catch {
-    // Return structured error so the agent can tell the user rather than hallucinate
-    return JSON.stringify({
-      error:
-        'Tool execution failed. Provider information is temporarily unavailable.',
-    });
-  }
-}
+  },
+  search_hospitals: async (rawArgs: string) => {
+    try {
+      const args = JSON.parse(rawArgs);
+      const validated = searchHospitalsSchema.parse(args);
+      const results = await searchHospitals(validated);
+      return JSON.stringify({ results, count: results.length });
+    } catch {
+      return JSON.stringify({
+        error:
+          'Tool execution failed. Provider information is temporarily unavailable.',
+      });
+    }
+  },
+};
 
-export async function runAgent(messages: Message[]): Promise<AgentResult> {
-  const openai = new OpenAI({ apiKey: env.LLM_API_KEY });
+export async function runAgent(
+  messages: Message[],
+  openai: OpenAI,
+  registry: Record<string, ToolExecutor>
+): Promise<AgentResult> {
 
   // Bound conversation history to avoid sending too much context
   const recentMessages = messages.slice(-MAX_HISTORY_MESSAGES);
@@ -85,10 +91,13 @@ export async function runAgent(messages: Message[]): Promise<AgentResult> {
     const toolResultMessages: ChatCompletionMessageParam[] = [];
 
     for (const toolCall of choice.message.tool_calls) {
-      const result = await executeTool(
-        toolCall.function.name,
-        toolCall.function.arguments,
-      );
+      const executor = registry[toolCall.function.name];
+      let result: string;
+      if (executor) {
+        result = await executor(toolCall.function.arguments);
+      } else {
+        result = JSON.stringify({ error: `Unknown tool: ${toolCall.function.name}` });
+      }
       toolResultMessages.push({
         role: 'tool' as const,
         tool_call_id: toolCall.id,
