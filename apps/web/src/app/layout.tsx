@@ -1,17 +1,17 @@
 import type { Metadata } from 'next';
-import { Inter, Noto_Kufi_Arabic } from 'next/font/google';
+import { Cairo } from 'next/font/google';
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
-const notoKufi = Noto_Kufi_Arabic({ 
-  subsets: ['arabic'],
+const cairo = Cairo({ 
+  subsets: ['latin', 'arabic'],
   weight: ['400', '500', '600', '700'],
-  variable: '--font-noto-kufi'
+  variable: '--font-cairo',
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
   title: 'HealTrip AI',
-  description: 'AI Patient Decision Assistant for finding doctors and hospitals',
+  description: 'AI Patient Decision Assistant for finding doctors and hospitals in Saudi Arabia',
 };
 
 export default function RootLayout({
@@ -20,9 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // Default to en/ltr but this gets overridden by ChatWindow's 'dir' attribute dynamically
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} ${notoKufi.variable} antialiased selection:bg-blue-200 selection:text-blue-900 dark:selection:bg-blue-900/50 dark:selection:text-blue-100`}>
+    <html lang="en" suppressHydrationWarning className="scroll-smooth">
+      <body className={`${cairo.variable} font-sans antialiased selection:bg-[#0D9488]/20 selection:text-[#162836] bg-[#F8FAFC] text-[#162836] min-h-screen flex flex-col`}>
         {children}
       </body>
     </html>
