@@ -23,6 +23,13 @@ The AI Agent relies purely on native tool calling (`search_doctors`, `search_hos
 
 **The AI has no direct access to the database.** It cannot write SQL, use Prisma, or access environment variables. It can only request tools. The backend executes the tools, validates arguments with Zod, queries the database, and returns structured JSON to the AI. 
 
+## File Upload & Context
+Users can upload `.txt`, `.md`, or `.csv` files to the chat. 
+- The client reads the content of the file and passes it to the AI securely as context.
+- Uploads are validated strictly to be text formats. 
+- This prevents large unparseable binaries from reaching the LLM and keeps the application secure without requiring heavy server-side file processing.
+- The server limits payload sizes with express limits.
+
 If the database returns no results, the AI is instructed to inform the user, preventing hallucination of non-existent medical providers.
 
 ## Security & Error Handling
@@ -62,6 +69,8 @@ Push the Prisma schema and run the seed script to populate mock hospitals and do
 npm run db:push
 npm run db:seed
 ```
+
+**Note**: The seed data (`prisma/seed.ts`) contains mock healthcare reference data created specifically for testing filtering, empty results, and AI tool calling. It includes several hospitals, specialized doctors, locations, and languages clearly labeled as demo data.
 
 ### 5. Start Development Servers
 

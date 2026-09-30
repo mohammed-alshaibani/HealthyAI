@@ -172,6 +172,30 @@ async function main() {
         languages: ['Arabic'],
         hospitalId: kfshd.id,
       },
+      {
+        name: 'Dr. Tariq Al-Hussain',
+        nameAr: 'د. طارق الحسين',
+        specialty: 'Dentistry',
+        city: 'Riyadh',
+        languages: ['Arabic', 'English'],
+        hospitalId: kfsh.id,
+      },
+      {
+        name: 'Dr. Amal Al-Shehri',
+        nameAr: 'د. أمل الشهري',
+        specialty: 'Ophthalmology',
+        city: 'Jeddah',
+        languages: ['Arabic', 'English'],
+        hospitalId: kauh.id,
+      },
+      {
+        name: 'Dr. Faisal Al-Faisal',
+        nameAr: 'د. فيصل الفيصل',
+        specialty: 'Dentistry',
+        city: 'Dammam',
+        languages: ['Arabic', 'Hindi'],
+        hospitalId: kfshd.id,
+      }
     ],
   });
 
