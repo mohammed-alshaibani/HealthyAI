@@ -14,6 +14,8 @@ model Hospital {
   city        String
   specialties String[]
   address     String
+  lat         Float?
+  lng         Float?
   createdAt   DateTime @default(now()) @map("created_at")
   doctors     Doctor[]
 

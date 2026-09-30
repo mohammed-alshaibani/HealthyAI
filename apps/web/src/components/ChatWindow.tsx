@@ -51,12 +51,6 @@ export function ChatWindow() {
   const searchParams = useSearchParams();
   const q = searchParams.get('q');
   
-  useEffect(() => {
-    if (q && messages.length === 0) {
-      handleSend(q);
-    }
-  }, [q]);
-
   const t = TEXTS[lang];
   const isAr = lang === 'ar';
 
@@ -76,7 +70,7 @@ export function ChatWindow() {
           );
         });
         setLocation(activeLocation);
-      } catch (e) {
+      } catch {
         // Continue without location, AI will ask for city
       } finally {
         setIsLocating(false);
@@ -103,6 +97,14 @@ export function ChatWindow() {
     }
   };
 
+  useEffect(() => {
+    if (q && messages.length === 0) {
+      // eslint-disable-next-line
+      handleSend(q);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q]);
+
   const handleClear = () => {
     setMessages([]);
     setConversationId(undefined);
@@ -127,7 +129,7 @@ export function ChatWindow() {
                 <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-[#10B981] border-2 border-white rounded-full"></div>
               </div>
               <div>
-                <h1 className="font-extrabold text-[#162836] text-lg tracking-tight leading-none">{t.title}</h1>
+                <h1 className="font-extrabold text-[#162836] text-lg tracking-tight leading-tight">{t.title}</h1>
                 <p className="text-xs text-[#0D9488] font-bold mt-1.5">{t.status}</p>
               </div>
             </div>
@@ -159,7 +161,7 @@ export function ChatWindow() {
               <Navigation className={`w-4 h-4 ${location ? 'fill-sky-500 text-sky-500' : isLocating ? 'animate-pulse' : ''}`} />
               {t.locate}
             </button>
-            <button onClick={handleClear} disabled={messages.length === 0} className="p-2.5 rounded-xl text-slate-400 hover:text-[#E31E24] hover:bg-red-50 transition-colors disabled:opacity-50" title={t.clear}>
+            <button onClick={handleClear} disabled={messages.length === 0} className="p-2.5 rounded-xl text-slate-400 hover:text-[#0D9488] hover:bg-red-50 transition-colors disabled:opacity-50" title={t.clear}>
               <RotateCcw className="w-5 h-5" />
             </button>
             <LanguageToggle lang={lang} setLang={setLang} />

@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { HeartPulse, ChevronLeft, ChevronRight, Search, MapPin, Building2, Globe2, Navigation, MessageSquare, PlusCircle, CheckCircle2 } from 'lucide-react';
+import { HeartPulse, ChevronLeft, ChevronRight, Search, MapPin, Building2,  Navigation, MessageSquare, PlusCircle, CheckCircle2 } from 'lucide-react';
+import { SPECIALTIES, SPECIALTIES_AR, CITIES, CITIES_AR, getDistanceKm } from '../../lib/constants';
 
 type Doctor = {
   id: string;
@@ -24,39 +25,9 @@ type Doctor = {
   distanceKm?: number;
 };
 
-// Haversine formula
-function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
-  const R = 6371; // Radius of the earth in km
-  const dLat = (lat2 - lat1) * (Math.PI / 180);
-  const dLon = (lon2 - lon1) * (Math.PI / 180);
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
-  return R * c; 
-}
-
-const SPECIALTIES = ['Cardiology', 'Orthopedics', 'Dentistry', 'Pediatrics', 'Ophthalmology', 'Dermatology', 'Neurology', 'Internal Medicine', 'OB-GYN'];
-const SPECIALTIES_AR: Record<string, string> = {
-  'Cardiology': 'طب القلب',
-  'Orthopedics': 'جراحة العظام',
-  'Dentistry': 'طب الأسنان',
-  'Pediatrics': 'طب الأطفال',
-  'Ophthalmology': 'طب العيون',
-  'Dermatology': 'الجلدية',
-  'Neurology': 'المخ والأعصاب',
-  'Internal Medicine': 'الباطنية',
-  'OB-GYN': 'النساء والولادة'
-};
-const CITIES = ['Riyadh', 'Jeddah', 'Dammam', 'Khobar', 'Makkah', 'Madinah', 'Abha'];
-const CITIES_AR: Record<string, string> = {
-  'Riyadh': 'الرياض', 'Jeddah': 'جدة', 'Dammam': 'الدمام', 'Khobar': 'الخبر', 'Makkah': 'مكة المكرمة', 'Madinah': 'المدينة المنورة', 'Abha': 'أبها'
-};
-
-export default function ProvidersHub() {
+export default function ProvidersHub({ initialTab = 'directory' }: { initialTab?: 'directory' | 'register' }) {
   const [lang, setLang] = useState<'en' | 'ar'>('en');
-  const [activeTab, setActiveTab] = useState<'directory' | 'register'>('directory');
+  const [activeTab, setActiveTab] = useState<'directory' | 'register'>(initialTab);
   const isAr = lang === 'ar';
 
   // --- Directory State ---
@@ -161,7 +132,8 @@ export default function ProvidersHub() {
       if (specialty) params.append('specialty', specialty);
       if (search) params.append('search', search);
 
-      const res = await fetch(`/api/providers?${params}`);
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+      const res = await fetch(`${API_URL}/providers?${params}`);
       if (res.ok) {
         const data = await res.json();
         let fetchedDocs: Doctor[] = data.doctors || [];
@@ -169,7 +141,7 @@ export default function ProvidersHub() {
         if (userLocation) {
           fetchedDocs = fetchedDocs.map(d => ({
             ...d,
-            distanceKm: getDistance(userLocation.lat, userLocation.lng, d.hospital.lat, d.hospital.lng)
+            distanceKm: getDistanceKm(userLocation.lat, userLocation.lng, d.hospital.lat, d.hospital.lng)
           })).sort((a, b) => (a.distanceKm || 0) - (b.distanceKm || 0));
         }
         setDoctors(fetchedDocs);
@@ -182,6 +154,7 @@ export default function ProvidersHub() {
   }, [city, specialty, search, userLocation]);
 
   useEffect(() => {
+    // eslint-disable-next-line
     if (activeTab === 'directory') fetchProviders();
   }, [fetchProviders, activeTab]);
 
@@ -214,8 +187,8 @@ export default function ProvidersHub() {
 
     if (!nameRegex.test(formData.hospitalName)) errs.hospitalName = t.errors.hospital;
     if (!docRegex.test(formData.doctorName) || formData.doctorName.length < 4) errs.doctorName = t.errors.doctor;
-    if (!SPECIALTIES.includes(formData.specialty)) errs.specialty = t.errors.specialty;
-    if (!CITIES.includes(formData.city)) errs.city = t.errors.city;
+    if (!(SPECIALTIES as readonly string[]).includes(formData.specialty)) errs.specialty = t.errors.specialty;
+    if (!(CITIES as readonly string[]).includes(formData.city)) errs.city = t.errors.city;
     if (!contactRegex.test(formData.contactInfo)) errs.contactInfo = t.errors.contact;
 
     setFieldErrors(errs);
@@ -228,7 +201,8 @@ export default function ProvidersHub() {
 
     setFormStatus('submitting');
     try {
-      const res = await fetch('/api/providers', {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+      const res = await fetch(`${API_URL}/providers`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -247,7 +221,7 @@ export default function ProvidersHub() {
     <div className="min-h-screen bg-[#F8FAFC] font-sans" dir={isAr ? 'rtl' : 'ltr'}>
       {/* Header */}
       <div className="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 h-16 sm:h-20 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 min-h-[4rem] sm:min-h-[5rem] py-3 flex flex-wrap gap-4 items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
             <div className="w-10 h-10 bg-[#0D9488] rounded-xl flex items-center justify-center shadow-inner">
               <HeartPulse className="w-6 h-6 text-white" />
@@ -273,21 +247,21 @@ export default function ProvidersHub() {
         </div>
 
         {/* Dual Tabs */}
-        <div className="flex justify-center mb-8">
-          <div className="bg-white p-1.5 rounded-2xl shadow-sm border border-slate-200 inline-flex gap-2 relative z-10">
+        <div className="flex justify-center mb-8 px-4 sm:px-0">
+          <div className="bg-white p-1.5 rounded-2xl shadow-sm border border-slate-200 flex flex-col sm:flex-row gap-2 relative z-10 w-full sm:w-auto">
             <button 
               onClick={() => setActiveTab('directory')}
-              className={`px-6 py-3 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'directory' ? 'bg-[#162836] text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'}`}
+              className={`flex-1 sm:flex-none px-6 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'directory' ? 'bg-[#162836] text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'}`}
             >
-              <Search className="w-4 h-4" />
-              {t.tabs.dir}
+              <Search className="w-4 h-4 shrink-0" />
+              <span className="whitespace-normal text-center">{t.tabs.dir}</span>
             </button>
             <button 
               onClick={() => setActiveTab('register')}
-              className={`px-6 py-3 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'register' ? 'bg-[#0D9488] text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'}`}
+              className={`flex-1 sm:flex-none px-6 py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'register' ? 'bg-[#0D9488] text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'}`}
             >
-              <PlusCircle className="w-4 h-4" />
-              {t.tabs.reg}
+              <PlusCircle className="w-4 h-4 shrink-0" />
+              <span className="whitespace-normal text-center">{t.tabs.reg}</span>
             </button>
           </div>
         </div>
@@ -382,7 +356,7 @@ export default function ProvidersHub() {
                         {t.chat}
                       </Link>
                       <a href={doc.hospital.mapsUrl || `https://maps.google.com/?q=${doc.hospital.lat},${doc.hospital.lng}`} target="_blank" rel="noreferrer" className="flex-1 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2">
-                        <MapPin className="w-4 h-4 text-[#E31E24]" />
+                        <MapPin className="w-4 h-4 text-[#0D9488]" />
                         {t.maps}
                       </a>
                     </div>

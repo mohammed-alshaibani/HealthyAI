@@ -25,7 +25,7 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
-app.use('/api', chatRouter);
+app.use('/api/chat', chatRouter);
 app.use('/api/providers', providersRouter);
 
 app.use(errorHandler);

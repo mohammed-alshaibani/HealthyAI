@@ -78,10 +78,12 @@ export function ChatInput({ onSend, isLoading, placeholder }: Props) {
       {fileError && <div className="text-xs text-red-500 px-2 font-medium">{fileError}</div>}
       
       {fileContent && (
-        <div className="flex items-center gap-2 bg-teal-50 border border-teal-100 text-teal-800 px-3 py-2 rounded-xl text-sm font-medium self-start">
-          <Paperclip className="w-4 h-4" />
-          <span className="truncate max-w-[200px]">{fileContent.name}</span>
-          <button onClick={() => setFileContent(null)} className="p-1 hover:bg-teal-200 rounded-full transition-colors ml-2">
+        <div className="flex items-center justify-between gap-2 bg-teal-50 border border-teal-100 text-teal-800 px-3 py-2 rounded-xl text-sm font-medium self-start max-w-full">
+          <div className="flex items-center gap-2 min-w-0">
+            <Paperclip className="w-4 h-4 flex-shrink-0" />
+            <span className="break-all whitespace-normal">{fileContent.name}</span>
+          </div>
+          <button onClick={() => setFileContent(null)} className="p-1 hover:bg-teal-200 rounded-full transition-colors flex-shrink-0">
             <X className="w-3 h-3" />
           </button>
         </div>

@@ -1,79 +1,57 @@
 import { describe, it, expect, vi } from 'vitest';
-import { runAgent } from '../apps/api/src/agent/agent';
+import { AgentOrchestrator } from '../apps/api/src/agent/agent';
+import type { LLMProvider } from '../apps/api/src/llm/llm-provider';
 
 describe('AI Agent DI and Tool Registry', () => {
   it('should inject tool registry and execute a tool correctly', async () => {
-    const mockOpenAI = {
-      chat: {
-        completions: {
-          create: vi.fn()
-            .mockResolvedValueOnce({
-              choices: [{
-                message: {
-                  content: null,
-                  tool_calls: [{
-                    id: 'call_123',
-                    function: { name: 'mock_tool', arguments: '{"test":"data"}' }
-                  }]
-                },
-                finish_reason: 'tool_calls'
-              }]
-            })
-            .mockResolvedValueOnce({
-              choices: [{
-                message: { content: 'Mocked final response' }
-              }]
-            })
-        }
-      }
-    } as any;
-
-    const mockTool = vi.fn().mockResolvedValue(JSON.stringify({ success: true }));
-    const mockRegistry = {
-      mock_tool: mockTool
+    const mockProvider: LLMProvider = {
+      complete: vi.fn()
+        .mockResolvedValueOnce({
+          content: null,
+          toolCalls: [{ id: 'call_123', function: { name: 'mock_tool', arguments: '{"test":"data"}' } }],
+          finishReason: 'tool_calls'
+        })
+        .mockResolvedValueOnce({
+          content: 'Mocked final response',
+          toolCalls: [],
+          finishReason: 'stop'
+        })
     };
 
-    const result = await runAgent([{ role: 'user', content: 'test' }], mockOpenAI, mockRegistry);
+    const mockTool = vi.fn().mockResolvedValue(JSON.stringify({ success: true }));
+    const mockRegistry = { mock_tool: mockTool };
+
+    const orchestrator = new AgentOrchestrator(mockProvider, mockRegistry);
+    const result = await orchestrator.run([{ role: 'user', content: 'test' }]);
     
     expect(mockTool).toHaveBeenCalledWith('{"test":"data"}');
-    expect(result.message).toBe('Mocked final response');
+    expect(result.content).toBe('Mocked final response');
     
-    // Ensure 2 completion calls were made (1 for tool call, 1 for final response)
-    expect(mockOpenAI.chat.completions.create).toHaveBeenCalledTimes(2);
+    expect(mockProvider.complete).toHaveBeenCalledTimes(2);
   });
   
   it('should handle unknown tools gracefully', async () => {
-    const mockOpenAI = {
-      chat: {
-        completions: {
-          create: vi.fn()
-            .mockResolvedValueOnce({
-              choices: [{
-                message: {
-                  content: null,
-                  tool_calls: [{
-                    id: 'call_456',
-                    function: { name: 'unknown_tool', arguments: '{}' }
-                  }]
-                },
-                finish_reason: 'tool_calls'
-              }]
-            })
-            .mockResolvedValueOnce({
-              choices: [{
-                message: { content: 'Handled unknown tool' }
-              }]
-            })
-        }
-      }
-    } as any;
+    const mockProvider: LLMProvider = {
+      complete: vi.fn()
+        .mockResolvedValueOnce({
+          content: null,
+          toolCalls: [{ id: 'call_456', function: { name: 'unknown_tool', arguments: '{}' } }],
+          finishReason: 'tool_calls'
+        })
+        .mockResolvedValueOnce({
+          content: 'Handled unknown tool',
+          toolCalls: [],
+          finishReason: 'stop'
+        })
+    };
 
-    const result = await runAgent([{ role: 'user', content: 'test' }], mockOpenAI, {});
+    const orchestrator = new AgentOrchestrator(mockProvider, {});
+    const result = await orchestrator.run([{ role: 'user', content: 'test' }]);
     
-    expect(result.message).toBe('Handled unknown tool');
+    expect(result.content).toBe('Handled unknown tool');
     
-    const secondCallArgs = mockOpenAI.chat.completions.create.mock.calls[1][0];
-    const toolResultMessage = secondCallArgs.messages.find((m: any) => m.role === 'tool');
+    const secondCallArgs = (mockProvider.complete as any).mock.calls[1][0];
+    const toolResultMessage = secondCallArgs.find((m: any) => m.role === 'tool');
     expect(toolResultMessage.content).toContain('Unknown tool: unknown_tool');
   });
 });

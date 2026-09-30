@@ -1,0 +1,4 @@
+export const MAX_MESSAGES_PER_REQUEST = 10;
+export const MAX_MESSAGE_LENGTH = 1000;
+export const MAX_HISTORY_MESSAGES = 10;
+export const MAX_NEARBY_HOSPITALS = 3;

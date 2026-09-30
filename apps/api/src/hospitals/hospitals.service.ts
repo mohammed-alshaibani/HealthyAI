@@ -3,26 +3,29 @@ import { prisma } from '../lib/prisma';
 
 export const searchHospitalsSchema = z
   .object({
-    city: z.string().optional(),
-    specialty: z.string().optional(),
+    city: z.string().describe('City name (e.g. Riyadh, Jeddah, Dammam)').optional(),
+    specialty: z.string().describe('Medical specialty/department (e.g. Cardiology, Dermatology, Orthopedics, Pediatrics, Neurology, General Surgery, Oncology)').optional(),
+    name: z.string().describe('Specific name of the hospital').optional(),
   })
   .strict();
 
 export type SearchHospitalsInput = z.infer<typeof searchHospitalsSchema>;
 
+import { buildNameSearchFilter, buildContainsFilter, normalizeArrayFilter, DEFAULT_SEARCH_LIMIT } from '../shared/db-utils';
+
 export async function searchHospitals(input: SearchHospitalsInput) {
   const where: Record<string, unknown> = {};
 
-  if (input.city) {
-    where.city = { contains: input.city, mode: 'insensitive' };
+  if (input.name) {
+    Object.assign(where, buildNameSearchFilter(input.name));
   }
 
-  // Normalize specialty to title case for array matching
+  if (input.city) {
+    where.city = buildContainsFilter(input.city);
+  }
+
   if (input.specialty) {
-    const normalized =
-      input.specialty.charAt(0).toUpperCase() +
-      input.specialty.slice(1).toLowerCase();
-    where.specialties = { has: normalized };
+    where.specialties = normalizeArrayFilter(input.specialty);
   }
 
   return prisma.hospital.findMany({
@@ -32,6 +35,12 @@ export async function searchHospitals(input: SearchHospitalsInput) {
         select: { id: true, name: true, nameAr: true, specialty: true },
       },
     },
-    take: 10,
+    take: DEFAULT_SEARCH_LIMIT,
+  });
+}
+
+export async function getAllHospitalsForLocation() {
+  return prisma.hospital.findMany({
+    select: { name: true, nameAr: true, city: true, lat: true, lng: true }
   });
 }

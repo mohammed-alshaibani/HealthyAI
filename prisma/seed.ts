@@ -13,6 +13,8 @@ async function main() {
       city: 'Riyadh',
       specialties: ['Cardiology', 'Oncology', 'Neurology', 'Orthopedics'],
       address: 'Al Mathar Ash Shamali, Riyadh 11564',
+      lat: 24.6726,
+      lng: 46.6784,
     },
   });
 
@@ -23,6 +25,8 @@ async function main() {
       city: 'Riyadh',
       specialties: ['Cardiology', 'General Surgery', 'Pediatrics', 'Dermatology'],
       address: 'Al Rimayah, Riyadh 14611',
+      lat: 24.7500,
+      lng: 46.8500,
     },
   });
 
@@ -33,6 +37,8 @@ async function main() {
       city: 'Riyadh',
       specialties: ['Neurology', 'Orthopedics', 'Pediatrics', 'Oncology'],
       address: 'As Sulimaniyah, Riyadh 12231',
+      lat: 24.6972,
+      lng: 46.6836,
     },
   });
 
@@ -43,6 +49,8 @@ async function main() {
       city: 'Jeddah',
       specialties: ['Cardiology', 'Dermatology', 'General Surgery', 'Pediatrics'],
       address: 'Al Jamiah, Jeddah 21589',
+      lat: 21.4988,
+      lng: 39.2274,
     },
   });
 
@@ -53,6 +61,8 @@ async function main() {
       city: 'Jeddah',
       specialties: ['Orthopedics', 'Neurology', 'General Surgery'],
       address: 'Al Andalus, Jeddah 23325',
+      lat: 21.5262,
+      lng: 39.1706,
     },
   });
 
@@ -63,6 +73,8 @@ async function main() {
       city: 'Dammam',
       specialties: ['Cardiology', 'Oncology', 'Orthopedics', 'Pediatrics'],
       address: 'Al Muraikabat, Dammam 32253',
+      lat: 26.3541,
+      lng: 50.1872,
     },
   });
 

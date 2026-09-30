@@ -3,36 +3,39 @@ import { prisma } from '../lib/prisma';
 
 export const searchDoctorsSchema = z
   .object({
-    specialty: z.string().optional(),
-    city: z.string().optional(),
-    language: z.string().optional(),
+    specialty: z.string().describe('Medical specialty (e.g. Cardiology, Dermatology, Orthopedics, Pediatrics, Neurology, General Surgery, Oncology)').optional(),
+    city: z.string().describe('City name (e.g. Riyadh, Jeddah, Dammam)').optional(),
+    language: z.string().describe('Preferred language of the doctor (e.g. Arabic, English)').optional(),
+    name: z.string().describe('Specific name of the doctor (e.g. Dr. Ahmed)').optional(),
   })
   .strict();
 
 export type SearchDoctorsInput = z.infer<typeof searchDoctorsSchema>;
 
+import { buildNameSearchFilter, buildContainsFilter, normalizeArrayFilter, DEFAULT_SEARCH_LIMIT } from '../shared/db-utils';
+
 export async function searchDoctors(input: SearchDoctorsInput) {
   const where: Record<string, unknown> = {};
 
+  if (input.name) {
+    Object.assign(where, buildNameSearchFilter(input.name));
+  }
+
   if (input.specialty) {
-    where.specialty = { contains: input.specialty, mode: 'insensitive' };
+    where.specialty = buildContainsFilter(input.specialty);
   }
 
   if (input.city) {
-    where.city = { contains: input.city, mode: 'insensitive' };
+    where.city = buildContainsFilter(input.city);
   }
 
-  // Normalize language to title case for array matching
   if (input.language) {
-    const normalized =
-      input.language.charAt(0).toUpperCase() +
-      input.language.slice(1).toLowerCase();
-    where.languages = { has: normalized };
+    where.languages = normalizeArrayFilter(input.language);
   }
 
   return prisma.doctor.findMany({
     where,
     include: { hospital: { select: { name: true, nameAr: true } } },
-    take: 10,
+    take: DEFAULT_SEARCH_LIMIT,
   });
 }

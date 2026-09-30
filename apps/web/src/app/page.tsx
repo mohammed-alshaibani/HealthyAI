@@ -144,7 +144,9 @@ export default function LandingPage() {
     let timer: NodeJS.Timeout;
 
     // Instantly reset on lang change
+    // eslint-disable-next-line
     setDisplayedText('');
+    // eslint-disable-next-line
     setHeadlineIndex(0);
 
     const handleType = () => {
@@ -196,8 +198,8 @@ export default function LandingPage() {
           flex items-center justify-between px-6 pointer-events-auto
           transition-all duration-500 ease-out
           ${scrolled 
-            ? 'bg-white/90 border-slate-200/60 shadow-slate-900/8 h-14 sm:h-16' 
-            : 'bg-white/70 border-white/40 shadow-[#162836]/5 h-16 sm:h-20'}
+            ? 'bg-white/90 border-slate-200/60 shadow-slate-900/8 min-h-[3.5rem] sm:min-h-[4rem] py-2' 
+            : 'bg-white/70 border-white/40 shadow-[#162836]/5 min-h-[4rem] sm:min-h-[5rem] py-3'}
         `}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-[#0D9488] rounded-xl flex items-center justify-center shadow-inner">
@@ -246,13 +248,13 @@ export default function LandingPage() {
             </div>
             
             {/* ===== TYPEWRITER — FIXED-HEIGHT BOX, ZERO LAYOUT SHIFT ===== */}
-            <div className="w-full mb-6" style={{ minHeight: '4.5rem' }}>
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#162836] leading-[1.35] whitespace-nowrap overflow-hidden text-ellipsis">
+            <div className="w-full mb-6 min-h-[5.5rem] md:min-h-[4.5rem] lg:min-h-[5.5rem] flex items-center">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#162836] leading-[1.35]">
                 {displayedText}
                 {/* Cursor — fixed-width, opacity animation, never pushes characters */}
                 <span 
                   className="inline-block align-middle animate-cursor-blink" 
-                  style={{ width: '3px', height: '0.85em', backgroundColor: '#E31E24', marginInlineStart: '4px', borderRadius: '2px' }}
+                  style={{ width: '3px', height: '0.85em', backgroundColor: '#0D9488', marginInlineStart: '4px', borderRadius: '2px' }}
                   aria-hidden="true"
                 />
               </h2>
@@ -265,21 +267,19 @@ export default function LandingPage() {
 
             {/* CTAs — 100% static */}
             <div className="flex flex-wrap items-center gap-4 mb-12">
-              <Link href="/chat" className="px-8 py-4 rounded-2xl bg-[#0D9488] hover:bg-[#0F766E] hover:shadow-lg hover:shadow-[#0D9488]/20 hover:-translate-y-1 text-white text-base font-bold transition-all duration-200 flex items-center gap-2">
+              <Link href="/chat" className="px-8 py-4 rounded-2xl bg-[#E31E24] hover:bg-[#C81A20] hover:shadow-[0_10px_20px_-10px_rgba(227,30,36,0.5)] hover:-translate-y-1 text-white text-base font-bold transition-all duration-300 flex items-center gap-2">
                 {t.startFree}
                 <DirectionalArrow className="w-5 h-5" />
               </Link>
-              <Link href="/providers" className="px-8 py-4 rounded-2xl bg-white border-2 border-slate-200 hover:border-[#162836] text-[#162836] hover:bg-slate-50 hover:-translate-y-1 text-base font-bold transition-all duration-200">
+              <Link href="/providers" className="px-8 py-4 rounded-2xl bg-white border border-slate-200 hover:border-[#162836] hover:shadow-[0_10px_20px_-10px_rgba(22,40,54,0.1)] text-[#162836] hover:-translate-y-1 text-base font-bold transition-all duration-300">
                 {isAr ? 'تصفح الأطباء' : 'Browse Providers'}
-              </Link>
-              <Link href="/register" className="px-8 py-4 rounded-2xl bg-white border-2 border-slate-200 hover:border-[#162836] text-[#162836] hover:bg-slate-50 hover:-translate-y-1 text-base font-bold transition-all duration-200">
-                {t.providerCTA}
               </Link>
             </div>
 
             {/* ===== QUICK FILTERS — Interactive Specialty & City Pills ===== */}
-            <div className="w-full bg-[#F8FAFC] rounded-3xl p-6 border border-slate-200/60 shadow-sm hover:shadow-md transition-shadow duration-300">
-              <div className="mb-5">
+            <div className="w-full bg-white rounded-3xl p-7 border border-slate-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300">
+              <h3 className="text-lg font-bold text-[#162836] mb-5">{isAr ? 'عن ماذا تبحث؟' : 'What are you looking for?'}</h3>
+              <div className="mb-6">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t.specialtiesTitle}</span>
                 <div className="flex flex-wrap gap-2 mt-3">
                   {t.specialties.map((spec) => {
@@ -297,8 +297,8 @@ export default function LandingPage() {
                   })}
                 </div>
               </div>
-              <div>
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t.citiesTitle}</span>
+              <div className="pt-2 border-t border-slate-100">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-2 inline-block">{t.citiesTitle}</span>
                 <div className="flex flex-wrap gap-2 mt-3">
                   {t.cities.map((city) => (
                     <Link 
@@ -360,7 +360,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16 animate-fade-up">
             <h2 className="text-3xl md:text-4xl font-bold text-[#162836] tracking-tight leading-[1.35]">{t.servicesTitle}</h2>
-            <div className="w-16 h-1.5 rounded-full bg-[#E31E24] mx-auto mt-6" />
+            <div className="w-16 h-1.5 rounded-full bg-[#0D9488] mx-auto mt-6" />
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
@@ -409,11 +409,17 @@ export default function LandingPage() {
       {/* ============================================================ */}
       {/*  STATISTICS SECTION — Deep navy, tabular-nums                */}
       {/* ============================================================ */}
-      <section className="bg-[#162836] py-24 relative overflow-hidden rounded-[3rem] mx-4 sm:mx-8 my-12 shadow-2xl">
+      <section className="bg-[#162836] py-24 relative overflow-hidden rounded-[3rem] mx-4 sm:mx-8 my-12 shadow-[0_20px_40px_-15px_rgba(22,40,54,0.5)]">
         {/* Abstract orbs */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#0D9488]/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#0284C7]/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3 pointer-events-none" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#0D9488]/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#0284C7]/20 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/3 pointer-events-none" />
         
+        <div className="max-w-7xl mx-auto px-6 relative z-10 text-center mb-12">
+          <p className="text-slate-400 text-sm font-medium">
+            {isAr ? 'ملاحظة: الإحصائيات المعروضة أدناه تمثل عينة تجريبية من قاعدة بياناتنا.' : 'Note: The statistics displayed below represent a demo snapshot of our database.'}
+          </p>
+        </div>
+
         <div className="max-w-7xl mx-auto px-6 relative z-10 grid grid-cols-2 md:grid-cols-4 gap-6">
           {t.stats.map((stat, idx) => (
             <div 
@@ -438,7 +444,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16 animate-fade-up">
             <h2 className="text-3xl md:text-4xl font-bold text-[#162836] tracking-tight leading-[1.35]">{t.excellenceTitle}</h2>
-            <div className="w-16 h-1.5 rounded-full bg-[#E31E24] mx-auto mt-6" />
+            <div className="w-16 h-1.5 rounded-full bg-[#0D9488] mx-auto mt-6" />
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">

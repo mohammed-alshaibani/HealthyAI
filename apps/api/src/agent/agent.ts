@@ -1,133 +1,93 @@
-import OpenAI from 'openai';
-import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
-import { env } from '../lib/env';
-import { SYSTEM_PROMPT } from './prompts';
 import { AGENT_TOOLS } from './tools';
-import {
-  searchDoctors,
-  searchDoctorsSchema,
-} from '../doctors/doctors.service';
-import {
-  searchHospitals,
-  searchHospitalsSchema,
-} from '../hospitals/hospitals.service';
-
-const MAX_HISTORY_MESSAGES = 20;
-
-export interface Message {
-  role: 'user' | 'assistant';
-  content: string;
-}
-
-export interface AgentResult {
-  message: string;
-}
+import { SYSTEM_PROMPT, GROUNDING_REMINDER } from './prompts';
+import { LLMError, ToolError } from '../shared/errors';
+import type { LLMProvider, LLMMessage } from '../llm/llm-provider';
 
 export type ToolExecutor = (rawArgs: string) => Promise<string>;
 
-export const toolRegistry: Record<string, ToolExecutor> = {
-  search_doctors: async (rawArgs: string) => {
+const MAX_ITERATIONS = 5;
+
+export class AgentOrchestrator {
+  constructor(
+    private llm: LLMProvider,
+    private toolRegistry: Record<string, ToolExecutor>
+  ) {}
+
+  /**
+   * Run a multi-pass tool-calling agent loop.
+   */
+  async run(messages: LLMMessage[]): Promise<LLMMessage> {
     try {
-      const args = JSON.parse(rawArgs);
-      const validated = searchDoctorsSchema.parse(args);
-      const results = await searchDoctors(validated);
-      return JSON.stringify({ results, count: results.length });
-    } catch {
-      return JSON.stringify({
-        error:
-          'Tool execution failed. Provider information is temporarily unavailable.',
-      });
-    }
-  },
-  search_hospitals: async (rawArgs: string) => {
-    try {
-      const args = JSON.parse(rawArgs);
-      const validated = searchHospitalsSchema.parse(args);
-      const results = await searchHospitals(validated);
-      return JSON.stringify({ results, count: results.length });
-    } catch {
-      return JSON.stringify({
-        error:
-          'Tool execution failed. Provider information is temporarily unavailable.',
-      });
-    }
-  },
-};
+      // 1. Prepare messages with System Prompt
+      const agentMessages: LLMMessage[] = [
+        { role: 'system', content: SYSTEM_PROMPT },
+        ...messages
+      ];
 
-export async function runAgent(
-  messages: Message[],
-  openai: OpenAI,
-  registry: Record<string, ToolExecutor>
-): Promise<AgentResult> {
+      let iterations = 0;
 
-  // Bound conversation history to avoid sending too much context
-  const recentMessages = messages.slice(-MAX_HISTORY_MESSAGES);
+      while (iterations < MAX_ITERATIONS) {
+        iterations++;
 
-  const chatMessages: ChatCompletionMessageParam[] = [
-    { role: 'system', content: SYSTEM_PROMPT },
-    ...recentMessages.map((m) => ({
-      role: m.role as 'user' | 'assistant',
-      content: m.content,
-    })),
-  ];
+        // 2. LLM Call
+        // Inject grounding reminder if this is after tool calls (iterations > 1)
+        if (iterations > 1) {
+           agentMessages.push({
+             role: 'user',
+             content: `[System Reminder] ${GROUNDING_REMINDER}`
+           });
+        }
+        
+        const response = await this.llm.complete(agentMessages, AGENT_TOOLS);
 
-  const response = await openai.chat.completions.create({
-    model: env.LLM_MODEL,
-    messages: chatMessages,
-    tools: AGENT_TOOLS,
-    temperature: 0.3,
-  });
+        // 3. Check for tool calls
+        if (response.toolCalls.length === 0) {
+          return {
+            role: 'assistant',
+            content: response.content,
+          };
+        }
 
-  const choice = response.choices[0];
-  if (!choice?.message) {
-    throw new Error('No response from LLM');
-  }
+        // 4. Append assistant's tool call request to history
+        agentMessages.push({
+          role: 'assistant',
+          content: response.content,
+          tool_calls: response.toolCalls,
+        });
 
-  // If the model wants to call tools, execute them and get a grounded response
-  if (
-    choice.finish_reason === 'tool_calls' &&
-    choice.message.tool_calls?.length
-  ) {
-    const toolResultMessages: ChatCompletionMessageParam[] = [];
+        // 5. Execute tools
+        for (const tc of response.toolCalls) {
+          const executor = this.toolRegistry[tc.function.name];
+          let toolResultText = '';
 
-    for (const toolCall of choice.message.tool_calls) {
-      const executor = registry[toolCall.function.name];
-      let result: string;
-      if (executor) {
-        result = await executor(toolCall.function.arguments);
-      } else {
-        result = JSON.stringify({ error: `Unknown tool: ${toolCall.function.name}` });
+          if (!executor) {
+            toolResultText = JSON.stringify({ error: `Unknown tool: ${tc.function.name}` });
+          } else {
+            try {
+              toolResultText = await executor(tc.function.arguments);
+            } catch (error) {
+              console.error(`[Agent] Tool ${tc.function.name} failed:`, error);
+              toolResultText = JSON.stringify({ error: `Tool execution failed: ${error instanceof Error ? error.message : 'Unknown error'}` });
+            }
+          }
+
+          agentMessages.push({
+            role: 'tool',
+            tool_call_id: tc.id,
+            content: toolResultText,
+          });
+        }
       }
-      toolResultMessages.push({
-        role: 'tool' as const,
-        tool_call_id: toolCall.id,
-        content: result,
-      });
+
+      // If we exit the loop, we hit the max iterations limit.
+      return {
+        role: 'assistant',
+        content: "I apologize, but I need to stop processing this request as it's taking too long.",
+      };
+
+    } catch (error) {
+      if (error instanceof LLMError) throw error;
+      throw new LLMError(error instanceof Error ? error.message : 'Unknown LLM error');
     }
-
-    // Second LLM call with tool results to generate the final grounded response
-    const followUp = await openai.chat.completions.create({
-      model: env.LLM_MODEL,
-      messages: [
-        ...chatMessages,
-        choice.message, // assistant message that requested tools
-        ...toolResultMessages,
-      ],
-      temperature: 0.3,
-    });
-
-    const finalChoice = followUp.choices[0];
-    if (!finalChoice?.message?.content) {
-      throw new Error('No response from LLM after tool execution');
-    }
-
-    return { message: finalChoice.message.content };
   }
-
-  // Direct response (no tool call needed)
-  if (!choice.message.content) {
-    throw new Error('Empty response from LLM');
-  }
-
-  return { message: choice.message.content };
 }
