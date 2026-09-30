@@ -22,7 +22,8 @@ const TEXTS = {
     ],
     clear: 'Clear Chat',
     home: 'Back to Home',
-    locate: 'Locate Me'
+    locate: 'Locate Me',
+    locationActive: '📍 Location Active'
   },
   ar: {
     title: 'رحلة الشفاء الذكي',
@@ -35,7 +36,8 @@ const TEXTS = {
     ],
     clear: 'مسح المحادثة',
     home: 'العودة للرئيسية',
-    locate: 'تحديد موقعي'
+    locate: 'تحديد موقعي',
+    locationActive: '📍 تم تحديد موقعك'
   },
 };
 
@@ -46,6 +48,7 @@ export function ChatWindow() {
   const [conversationId, setConversationId] = useState<string | undefined>();
   const [error, setError] = useState<string | null>(null);
   const [location, setLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [resolvedLocation, setResolvedLocation] = useState<{cityEn: string, cityAr: string, districtEn: string, districtAr: string} | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   
   const searchParams = useSearchParams();
@@ -66,12 +69,12 @@ export function ChatWindow() {
           navigator.geolocation.getCurrentPosition(
             (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
             reject,
-            { timeout: 5000 }
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
           );
         });
         setLocation(activeLocation);
       } catch {
-        // Continue without location, AI will ask for city
+        // Continue without location
       } finally {
         setIsLocating(false);
       }
@@ -89,6 +92,9 @@ export function ChatWindow() {
       setMessages([...newMessages, response.message]);
       if (response.conversationId) {
         setConversationId(response.conversationId);
+      }
+      if (response.resolvedLocation) {
+        setResolvedLocation(response.resolvedLocation);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -139,6 +145,7 @@ export function ChatWindow() {
               onClick={() => {
                 if (location) {
                   setLocation(null);
+                  setResolvedLocation(null);
                   return;
                 }
                 if ('geolocation' in navigator) {
@@ -151,15 +158,20 @@ export function ChatWindow() {
                     () => {
                       alert(isAr ? 'تعذر الوصول إلى الموقع' : 'Could not access location');
                       setIsLocating(false);
-                    }
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
                   );
                 }
               }} 
-              className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-bold border transition-colors ${location ? 'bg-sky-50 border-sky-200 text-sky-700' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'}`}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-bold border transition-colors ${location ? 'bg-emerald-50 border-emerald-300 text-emerald-700' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'}`}
               title={t.locate}
             >
-              <Navigation className={`w-4 h-4 ${location ? 'fill-sky-500 text-sky-500' : isLocating ? 'animate-pulse' : ''}`} />
-              {t.locate}
+              <Navigation className={`w-4 h-4 ${location ? 'fill-emerald-500 text-emerald-600' : isLocating ? 'animate-pulse' : ''}`} />
+              {location ? (
+                resolvedLocation ? (
+                  isAr ? `📍 موقعك: ${resolvedLocation.cityAr} - ${resolvedLocation.districtAr}` : `📍 Location: ${resolvedLocation.cityEn} - ${resolvedLocation.districtEn}`
+                ) : t.locationActive
+              ) : t.locate}
             </button>
             <button onClick={handleClear} disabled={messages.length === 0} className="p-2.5 rounded-xl text-slate-400 hover:text-[#0D9488] hover:bg-red-50 transition-colors disabled:opacity-50" title={t.clear}>
               <RotateCcw className="w-5 h-5" />

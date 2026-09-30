@@ -46,12 +46,13 @@ export async function handleChat(req: Request, res: Response, next: NextFunction
     const currentConversationId = conversationId || randomUUID();
 
     // 2. Delegate to Service
-    const assistantMessage = await chatService.handleMessage({ messages, location, language });
+    const { message, resolvedLocation } = await chatService.handleMessage({ messages, location, language });
 
     // 3. Return Response
     res.json({
-      message: assistantMessage,
-      conversationId: currentConversationId
+      message,
+      conversationId: currentConversationId,
+      resolvedLocation,
     });
 
   } catch (error) {

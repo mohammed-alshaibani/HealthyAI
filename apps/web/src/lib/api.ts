@@ -3,9 +3,17 @@ export type Message = {
   content: string;
 };
 
+export type ResolvedGeoLocation = {
+  cityEn: string;
+  cityAr: string;
+  districtEn: string;
+  districtAr: string;
+};
+
 export type ChatResponse = {
   conversationId: string;
   message: Message;
+  resolvedLocation?: ResolvedGeoLocation;
 };
 
 export type ChatError = {

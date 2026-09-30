@@ -7,7 +7,7 @@ import { searchHospitals } from '../hospitals/hospitals.service';
 export const searchDoctorsSchema = z
   .object({
     specialty: z.string().describe('Medical specialty (e.g. Cardiology, Dermatology, Orthopedics, Pediatrics, Neurology, General Surgery, Oncology)').optional(),
-    city: z.string().describe('City name (e.g. Riyadh, Jeddah, Dammam)').optional(),
+    city: z.string().describe('City name (e.g. Riyadh, Jeddah, Dammam). Optional if user location is active.').optional(),
     language: z.string().describe('Preferred language of the doctor (e.g. Arabic, English)').optional(),
     name: z.string().describe('Specific name of the doctor (e.g. Dr. Ahmed)').optional(),
   })
@@ -15,7 +15,7 @@ export const searchDoctorsSchema = z
 
 export const searchHospitalsSchema = z
   .object({
-    city: z.string().describe('City name (e.g. Riyadh, Jeddah, Dammam)').optional(),
+    city: z.string().describe('City name (e.g. Riyadh, Jeddah, Dammam). Optional if user location is active.').optional(),
     specialty: z.string().describe('Medical specialty/department (e.g. Cardiology, Dermatology, Orthopedics, Pediatrics, Neurology, General Surgery, Oncology)').optional(),
     name: z.string().describe('Specific name of the hospital').optional(),
   })
@@ -40,15 +40,27 @@ export const AGENT_TOOLS: ToolDefinition[] = [
   },
 ];
 
-export const toolRegistry = {
-  search_doctors: async (rawArgs: string) => {
-    // Validate with Zod before hitting domain service
-    const parsed = searchDoctorsSchema.parse(JSON.parse(rawArgs));
-    return JSON.stringify(await searchDoctors(parsed));
-  },
-  search_hospitals: async (rawArgs: string) => {
-    // Validate with Zod before hitting domain service
-    const parsed = searchHospitalsSchema.parse(JSON.parse(rawArgs));
-    return JSON.stringify(await searchHospitals(parsed));
-  },
-};
+export function createToolRegistry(userLocation?: { lat: number; lng: number }) {
+  return {
+    search_doctors: async (rawArgs: string) => {
+      const parsed = searchDoctorsSchema.parse(JSON.parse(rawArgs));
+      const input = {
+        ...parsed,
+        lat: userLocation?.lat,
+        lng: userLocation?.lng,
+      };
+      return JSON.stringify(await searchDoctors(input));
+    },
+    search_hospitals: async (rawArgs: string) => {
+      const parsed = searchHospitalsSchema.parse(JSON.parse(rawArgs));
+      const input = {
+        ...parsed,
+        lat: userLocation?.lat,
+        lng: userLocation?.lng,
+      };
+      return JSON.stringify(await searchHospitals(input));
+    },
+  };
+}
+
+export const toolRegistry = createToolRegistry();

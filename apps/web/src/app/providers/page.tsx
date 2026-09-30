@@ -174,7 +174,8 @@ export default function ProvidersHub({ initialTab = 'directory' }: { initialTab?
         () => {
           alert(isAr ? 'تعذر الوصول إلى الموقع' : 'Could not access location');
           setLoading(false);
-        }
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     }
   };

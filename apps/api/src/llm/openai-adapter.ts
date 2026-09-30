@@ -31,7 +31,7 @@ export class OpenAIAdapter implements LLMProvider {
       model: this.model,
       messages: openaiMessages,
       ...(tools?.length ? { tools: tools as never[] } : {}),
-      temperature: 0.3,
+      temperature: 0.1,
     });
 
     const choice = response.choices[0];
