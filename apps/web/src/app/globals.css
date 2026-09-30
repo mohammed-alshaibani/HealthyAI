@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-cairo), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "DIN Next LT Arabic", var(--font-ibm), sans-serif;
+  --font-heading: "DIN Next LT Arabic", var(--font-almarai), sans-serif;
 }
 
 @layer base {

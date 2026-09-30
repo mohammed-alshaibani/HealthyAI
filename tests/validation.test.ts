@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { searchDoctorsSchema } from '../apps/api/src/doctors/doctors.service';
+import { searchDoctorsSchema } from '../apps/api/src/agent/tools';
 
 describe('Tool Validation', () => {
   it('should validate correct doctor search args', () => {

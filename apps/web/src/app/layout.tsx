@@ -1,11 +1,18 @@
 import type { Metadata } from 'next';
-import { Cairo } from 'next/font/google';
+import { Almarai, IBM_Plex_Sans_Arabic } from 'next/font/google';
 import './globals.css';
 
-const cairo = Cairo({ 
-  subsets: ['latin', 'arabic'],
+const almarai = Almarai({ 
+  subsets: ['arabic'],
+  weight: ['400', '700', '800'],
+  variable: '--font-almarai',
+  display: 'swap',
+});
+
+const ibmPlex = IBM_Plex_Sans_Arabic({
+  subsets: ['arabic'],
   weight: ['400', '500', '600', '700'],
-  variable: '--font-cairo',
+  variable: '--font-ibm',
   display: 'swap',
 });
 
@@ -21,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className="scroll-smooth">
-      <body className={`${cairo.variable} font-sans antialiased selection:bg-[#0D9488]/20 selection:text-[#162836] bg-[#F8FAFC] text-[#162836] min-h-screen flex flex-col`}>
+      <body className={`${almarai.variable} ${ibmPlex.variable} font-sans antialiased bg-white text-[#475569] min-h-screen flex flex-col selection:bg-[#0D9488]/20 selection:text-[#162836]`}>
         {children}
       </body>
     </html>

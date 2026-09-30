@@ -85,7 +85,7 @@ export function ChatWindow() {
     setError(null);
 
     try {
-      const response = await sendMessage(newMessages, conversationId, activeLocation || undefined);
+      const response = await sendMessage(newMessages, conversationId, activeLocation || undefined, lang);
       setMessages([...newMessages, response.message]);
       if (response.conversationId) {
         setConversationId(response.conversationId);

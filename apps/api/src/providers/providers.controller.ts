@@ -1,7 +1,7 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { providerService } from './providers.service';
-import { ValidationError } from '../shared/errors';
+import { validateRequest } from '../shared/middleware/validate-request';
 
 const NAME_REGEX = /^[a-zA-Z\u0600-\u06FF\s\-]{4,}$/;
 const DOC_NAME_REGEX = /^([a-zA-Z\u0600-\u06FF\.]+\s+)+[a-zA-Z\u0600-\u06FF]+$/;
@@ -16,27 +16,18 @@ const registerProviderSchema = z.object({
   contactInfo: z.string().regex(CONTACT_REGEX)
 }).strict();
 
-export async function registerProvider(req: Request, res: Response) {
+export async function registerProvider(req: Request, res: Response, next: NextFunction) {
   try {
-    const parseResult = registerProviderSchema.safeParse(req.body);
-    if (!parseResult.success) {
-      throw new ValidationError('Invalid provider data', parseResult.error.format());
-    }
-
-    await providerService.registerProvider(parseResult.data);
+    // req.body is pre-validated by Zod middleware
+    await providerService.registerProvider(req.body);
     
     res.status(201).json({ success: true, message: 'Provider registered successfully' });
   } catch (error) {
-    if (error instanceof ValidationError) {
-      return res.status(error.statusCode).json({
-        error: { code: error.code, message: error.message, details: error.details }
-      });
-    }
     throw error;
   }
 }
 
-export async function getProviders(req: Request, res: Response) {
+export async function getProviders(req: Request, res: Response, next: NextFunction) {
   try {
     const { city, specialty, search } = req.query;
     
@@ -68,10 +59,10 @@ export async function getProviders(req: Request, res: Response) {
 
     res.json({ doctors: doctorsDTO });
   } catch (error) {
-    throw error;
+    next(error);
   }
 }
 
 export const providersRouter = express.Router();
-providersRouter.post('/', registerProvider);
+providersRouter.post('/', validateRequest(registerProviderSchema), registerProvider);
 providersRouter.get('/', getProviders);

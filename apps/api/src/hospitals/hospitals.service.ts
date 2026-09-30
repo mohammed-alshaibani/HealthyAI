@@ -1,17 +1,11 @@
-import { z } from 'zod';
+export interface SearchHospitalsInput {
+  city?: string;
+  specialty?: string;
+  name?: string;
+}
+
 import { prisma } from '../lib/prisma';
-
-export const searchHospitalsSchema = z
-  .object({
-    city: z.string().describe('City name (e.g. Riyadh, Jeddah, Dammam)').optional(),
-    specialty: z.string().describe('Medical specialty/department (e.g. Cardiology, Dermatology, Orthopedics, Pediatrics, Neurology, General Surgery, Oncology)').optional(),
-    name: z.string().describe('Specific name of the hospital').optional(),
-  })
-  .strict();
-
-export type SearchHospitalsInput = z.infer<typeof searchHospitalsSchema>;
-
-import { buildNameSearchFilter, buildContainsFilter, normalizeArrayFilter, DEFAULT_SEARCH_LIMIT } from '../shared/db-utils';
+import { buildNameSearchFilter, buildContainsFilter, normalizeArrayFilter, normalizeSpecialty, DEFAULT_SEARCH_LIMIT } from '../shared/db-utils';
 
 export async function searchHospitals(input: SearchHospitalsInput) {
   const where: Record<string, unknown> = {};
@@ -25,7 +19,7 @@ export async function searchHospitals(input: SearchHospitalsInput) {
   }
 
   if (input.specialty) {
-    where.specialties = normalizeArrayFilter(input.specialty);
+    where.specialties = normalizeArrayFilter(normalizeSpecialty(input.specialty));
   }
 
   return prisma.hospital.findMany({

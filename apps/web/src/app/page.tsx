@@ -232,7 +232,7 @@ export default function LandingPage() {
       {/* ============================================================ */}
       {/*  HERO SECTION                                                 */}
       {/* ============================================================ */}
-      <main className="bg-white pt-32 pb-16 md:pt-40 md:pb-24 rounded-b-[3rem] shadow-sm relative z-10 overflow-hidden">
+      <main className="w-full bg-white pt-32 pb-16 md:pt-40 md:pb-24 rounded-none relative z-10 overflow-hidden">
         {/* Subtle background gradient wash */}
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-teal-50 via-sky-50/50 to-transparent rounded-full blur-3xl opacity-60 pointer-events-none -translate-y-1/3 translate-x-1/4" />
 
@@ -247,9 +247,9 @@ export default function LandingPage() {
               {t.badge}
             </div>
             
-            {/* ===== TYPEWRITER — FIXED-HEIGHT BOX, ZERO LAYOUT SHIFT ===== */}
-            <div className="w-full mb-6 min-h-[5.5rem] md:min-h-[4.5rem] lg:min-h-[5.5rem] flex items-center">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#162836] leading-[1.35]">
+            {/* ===== TYPEWRITER — MIN-HEIGHT BOX, NO CLIPPING ===== */}
+            <div className="w-full mb-6 min-h-[4rem] sm:min-h-[4.5rem] lg:min-h-[5.5rem] flex items-center">
+              <h2 className="text-4xl lg:text-[52px] font-heading font-extrabold text-[#162836] tracking-tight leading-[1.35] py-2">
                 {displayedText}
                 {/* Cursor — fixed-width, opacity animation, never pushes characters */}
                 <span 
@@ -261,7 +261,7 @@ export default function LandingPage() {
             </div>
             
             {/* Subtitle — 100% static, never moves */}
-            <p className="text-lg md:text-xl text-slate-600 max-w-xl mb-10 leading-relaxed font-normal">
+            <p className="text-base font-medium text-slate-600 max-w-xl mb-10 leading-relaxed">
               {t.subheadline}
             </p>
 
@@ -277,8 +277,7 @@ export default function LandingPage() {
             </div>
 
             {/* ===== QUICK FILTERS — Interactive Specialty & City Pills ===== */}
-            <div className="w-full bg-white rounded-3xl p-7 border border-slate-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300">
-              <h3 className="text-lg font-bold text-[#162836] mb-5">{isAr ? 'عن ماذا تبحث؟' : 'What are you looking for?'}</h3>
+            <div className="w-full mt-2">
               <div className="mb-6">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t.specialtiesTitle}</span>
                 <div className="flex flex-wrap gap-2 mt-3">
@@ -297,8 +296,8 @@ export default function LandingPage() {
                   })}
                 </div>
               </div>
-              <div className="pt-2 border-t border-slate-100">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-2 inline-block">{t.citiesTitle}</span>
+              <div className="mt-8">
+                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mt-2 inline-block">{t.citiesTitle}</span>
                 <div className="flex flex-wrap gap-2 mt-3">
                   {t.cities.map((city) => (
                     <Link 
@@ -317,36 +316,31 @@ export default function LandingPage() {
 
           {/* ===== DOCTOR IMAGE SIDE (5 cols) — Layered Architectural Composition ===== */}
           <div className="md:col-span-5 relative">
-            {/* Gradient aura behind the card */}
-            <div className="absolute inset-0 -inset-x-8 -inset-y-8 bg-gradient-to-tr from-teal-500/15 via-sky-500/10 to-rose-500/10 blur-2xl rounded-full pointer-events-none" />
-            
-            <div className="relative rounded-3xl overflow-hidden aspect-[4/5] bg-slate-100 ring-4 ring-white shadow-2xl group">
+            {/* Geometric Backdrop */}
+            <div className="absolute -top-6 -right-6 rtl:-right-auto rtl:-left-6 w-32 h-32 bg-[#E31E24] rounded-2xl pointer-events-none" />
+            <div className="absolute -bottom-6 -left-6 rtl:-left-auto rtl:-right-6 w-40 h-40 bg-[#0284C7]/10 rounded-3xl pointer-events-none" />
+
+            <div className="relative rounded-2xl overflow-hidden aspect-[4/5] bg-slate-100 shadow-xl group">
               <Image 
                 src="/images/doctor_hero_portrait_1790783865132.jpg" 
                 alt="Doctor Portrait" 
                 fill 
                 sizes="(max-width: 768px) 100vw, 40vw"
-                className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                className="object-cover"
                 priority
               />
-              {/* Subtle colour overlay */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-[#0284C7]/15 to-transparent mix-blend-multiply opacity-40 group-hover:opacity-60 transition-opacity duration-700" />
             </div>
             
-            {/* Floating Badge — Verified Doctors (gentle float, glassmorphic) */}
-            <div className="absolute top-10 -left-6 rtl:-left-auto rtl:-right-6 backdrop-blur-md bg-white/90 border border-white/60 shadow-lg p-4 rounded-2xl flex items-center gap-3 animate-gentle-float">
-              <div className="w-11 h-11 bg-[#10B981]/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                <ShieldCheck className="w-5 h-5 text-[#10B981]" />
-              </div>
-              <p className="text-[#162836] font-bold text-sm">{isAr ? 'أطباء معتمدون' : 'Verified Doctors'}</p>
+            {/* Floating Badge — Verified Doctors */}
+            <div className="absolute top-8 -right-5 rtl:-right-5 rtl:-left-auto w-max max-w-[200px] bg-white/95 backdrop-blur-md px-4 py-2.5 rounded-xl shadow-lg border border-slate-100 flex items-center gap-2.5 animate-gentle-float">
+              <ShieldCheck className="w-5 h-5 text-[#10B981] flex-shrink-0" />
+              <p className="text-[#162836] font-bold text-sm leading-tight">{isAr ? 'أطباء معتمدون' : 'Verified Doctors'}</p>
             </div>
 
             {/* Floating Badge — 24/7 AI */}
-            <div className="absolute bottom-10 -right-6 rtl:-right-auto rtl:-left-6 backdrop-blur-md bg-white/90 border border-white/60 shadow-lg p-4 rounded-2xl flex items-center gap-3 animate-gentle-float" style={{ animationDelay: '1.5s' }}>
-              <div className="w-11 h-11 bg-[#0D9488]/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                <Activity className="w-5 h-5 text-[#0D9488]" />
-              </div>
-              <p className="text-[#162836] font-bold text-sm">{isAr ? 'مساعدة ذكية ٢٤/٧' : '24/7 AI Assistance'}</p>
+            <div className="absolute bottom-8 -left-5 rtl:-left-5 rtl:-right-auto w-max max-w-[200px] bg-white/95 backdrop-blur-md px-4 py-2.5 rounded-xl shadow-lg border border-slate-100 flex items-center gap-2.5 animate-gentle-float" style={{ animationDelay: '1.5s' }}>
+              <Activity className="w-5 h-5 text-[#0D9488] flex-shrink-0" />
+              <p className="text-[#162836] font-bold text-sm leading-tight">{isAr ? 'مساعدة ذكية' : '24/7 AI'}</p>
             </div>
           </div>
 
@@ -359,8 +353,8 @@ export default function LandingPage() {
       <section className="py-24 bg-[#F8FAFC]">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16 animate-fade-up">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#162836] tracking-tight leading-[1.35]">{t.servicesTitle}</h2>
-            <div className="w-16 h-1.5 rounded-full bg-[#0D9488] mx-auto mt-6" />
+            <h2 className="text-3xl md:text-4xl font-heading font-extrabold text-[#162836] tracking-tight leading-[1.35]">{t.servicesTitle}</h2>
+            <p className="text-slate-500 text-lg font-medium mt-3">{isAr ? 'تم تصميمها لراحتك ورعايتك' : 'Designed for your comfort and care'}</p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
@@ -369,16 +363,16 @@ export default function LandingPage() {
                 key={idx} 
                 className={`
                   animate-fade-up stagger-${idx + 1}
-                  group bg-white p-8 rounded-[2rem] border border-slate-200/60 shadow-sm
-                  hover:shadow-[0_20px_40px_-15px_rgba(13,148,136,0.15)] hover:border-teal-500/40
-                  hover:-translate-y-2 transition-all duration-300
+                  bg-white rounded-2xl p-7 border border-slate-200/80 shadow-xs hover:shadow-xl hover:border-teal-600/30 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group
                 `}
               >
-                <div className="w-16 h-16 bg-[#F8FAFC] group-hover:bg-[#0D9488] rounded-2xl flex items-center justify-center mb-8 transition-colors duration-300">
-                  <svc.icon className="w-8 h-8 text-[#0D9488] group-hover:text-white transition-colors duration-300" />
+                <div>
+                  <div className={`w-12 h-12 rounded-xl text-white flex items-center justify-center shadow-sm mb-6 ${idx === 0 ? 'bg-[#10B981]' : idx === 1 ? 'bg-[#0284C7]' : 'bg-[#162836]'}`}>
+                    <svc.icon className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-xl font-heading font-extrabold text-[#162836] mb-2.5">{svc.title}</h3>
+                  <p className="text-slate-600 font-medium text-[15px] leading-relaxed mb-6">{svc.desc}</p>
                 </div>
-                <h3 className="text-xl font-bold text-[#162836] mb-4 leading-[1.35]">{svc.title}</h3>
-                <p className="text-slate-600 font-normal leading-relaxed mb-8">{svc.desc}</p>
                 <Link href={idx === 2 ? "/register" : "/chat"} className="inline-flex items-center font-bold text-[#0D9488] group-hover:text-[#162836] transition-colors">
                   {idx === 2 ? (isAr ? 'التسجيل' : 'Register') : (isAr ? 'البدء' : 'Start')}
                   {isAr 
@@ -409,31 +403,38 @@ export default function LandingPage() {
       {/* ============================================================ */}
       {/*  STATISTICS SECTION — Deep navy, tabular-nums                */}
       {/* ============================================================ */}
-      <section className="bg-[#162836] py-24 relative overflow-hidden rounded-[3rem] mx-4 sm:mx-8 my-12 shadow-[0_20px_40px_-15px_rgba(22,40,54,0.5)]">
-        {/* Abstract orbs */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#0D9488]/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#0284C7]/20 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/3 pointer-events-none" />
+      <section className="w-full bg-[#162836] py-20 text-white rounded-none relative overflow-hidden mt-12">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#0D9488]/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none" />
         
-        <div className="max-w-7xl mx-auto px-6 relative z-10 text-center mb-12">
-          <p className="text-slate-400 text-sm font-medium">
-            {isAr ? 'ملاحظة: الإحصائيات المعروضة أدناه تمثل عينة تجريبية من قاعدة بياناتنا.' : 'Note: The statistics displayed below represent a demo snapshot of our database.'}
-          </p>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-6 relative z-10 grid grid-cols-2 md:grid-cols-4 gap-6">
-          {t.stats.map((stat, idx) => (
-            <div 
-              key={idx} 
-              className={`
-                animate-fade-up stagger-${idx + 1}
-                bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 text-center 
-                hover:bg-white/10 hover:-translate-y-1 transition-all duration-300
-              `}
-            >
-              <div className="text-4xl md:text-5xl font-bold text-white mb-3 tabular-nums">{stat.value}</div>
-              <div className="text-[#0D9488] font-semibold text-sm tracking-wide">{stat.label}</div>
-            </div>
-          ))}
+        <div className="max-w-7xl mx-auto px-6 relative z-10 grid md:grid-cols-12 gap-12 items-center">
+          <div className="md:col-span-5 text-start">
+            <h2 className="text-3xl lg:text-4xl font-heading font-extrabold text-white leading-snug mb-4">
+              {isAr ? 'المجموعة الأعلى موثوقية في الرعاية الصحية الذكية' : 'The Most Trusted Group in Smart Healthcare'}
+            </h2>
+            <p className="text-slate-300 font-medium leading-relaxed mb-8">
+              {isAr ? 'نلتزم بتقديم أعلى مستويات الرعاية المتميزة، لنكون الخيار الأول لصحتك وصحة عائلتك.' : 'We are committed to delivering the highest standards of premium care, making us the first choice for your health.'}
+            </p>
+            <Link href="/register" className="inline-block bg-white text-[#162836] hover:bg-slate-100 font-bold px-7 py-3.5 rounded-lg transition-colors shadow-sm">
+              {isAr ? 'انضم إلى شبكتنا' : 'Join Our Network'}
+            </Link>
+          </div>
+          
+          <div className="md:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {t.stats.map((stat, idx) => {
+              const StatIcon = [Stethoscope, Building2, Activity, Clock][idx] || HeartPulse;
+              return (
+                <div key={idx} className="bg-white rounded-xl p-6 shadow-md flex items-center justify-between">
+                  <div>
+                    <div className="text-3xl lg:text-4xl font-heading font-extrabold text-[#162836] tabular-nums">{stat.value}</div>
+                    <div className="text-sm font-bold text-slate-600 mt-1">{stat.label}</div>
+                  </div>
+                  <div className="w-12 h-12 rounded-lg bg-teal-50 text-[#0D9488] flex items-center justify-center flex-shrink-0">
+                    <StatIcon className="w-6 h-6" />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </section>
 
@@ -443,8 +444,8 @@ export default function LandingPage() {
       <section id="excellence" className="py-24 bg-[#F8FAFC]">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16 animate-fade-up">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#162836] tracking-tight leading-[1.35]">{t.excellenceTitle}</h2>
-            <div className="w-16 h-1.5 rounded-full bg-[#0D9488] mx-auto mt-6" />
+            <h2 className="text-3xl md:text-4xl font-heading font-extrabold text-[#162836] tracking-tight leading-[1.35]">{t.excellenceTitle}</h2>
+            <p className="text-slate-500 text-lg font-medium mt-3">{isAr ? 'رعاية متخصصة بمعايير عالمية' : 'Specialized care with global standards'}</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -454,22 +455,17 @@ export default function LandingPage() {
                 href={`/chat?q=${isAr ? 'ابحث عن أطباء' : 'Find'} ${center.title} ${isAr ? '' : 'doctors'}`} 
                 className={`
                   animate-fade-up stagger-${idx + 1}
-                  group relative rounded-[2rem] overflow-hidden aspect-[4/3] bg-slate-100 shadow-md 
-                  hover:shadow-[0_20px_40px_-15px_rgba(22,40,54,0.2)] hover:border-teal-500/40
-                  transition-all duration-500 hover:-translate-y-2 block
+                  group relative rounded-2xl h-[340px] overflow-hidden bg-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 block cursor-pointer
                 `}
               >
                 <Image src={center.image} alt={center.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#162836]/90 via-[#162836]/40 to-transparent transition-opacity duration-500 group-hover:opacity-90" />
-                <div className="absolute bottom-0 left-0 right-0 p-8 flex flex-col items-start justify-end h-full">
-                  <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                    <h3 className="text-2xl font-bold text-white mb-2 leading-[1.35]">{center.title}</h3>
-                    <p className="text-slate-200 font-normal opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100 mb-4">
-                      {center.desc}
-                    </p>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#162836]/95 via-[#162836]/35 to-transparent opacity-90 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute bottom-6 inset-x-6 flex items-end justify-between">
+                  <div>
+                    <h3 className="text-2xl font-heading font-extrabold text-white">{center.title}</h3>
                   </div>
-                  <div className="w-12 h-12 rounded-2xl bg-[#0D9488] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0 shadow-lg">
-                    <DirectionalArrow className="w-6 h-6 text-white" />
+                  <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-white transform translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300 rtl:group-hover:translate-x-0 rtl:-translate-x-2">
+                    <DirectionalArrow className="w-5 h-5" />
                   </div>
                 </div>
               </Link>
@@ -479,39 +475,37 @@ export default function LandingPage() {
       </section>
 
       {/* ============================================================ */}
-      {/*  MODERN GLASSMORPHISM FOOTER                                  */}
+      {/*  CORPORATE FOOTER                                             */}
       {/* ============================================================ */}
-      <footer className="bg-[#162836] pt-20 pb-8 mt-auto rounded-t-[3rem] text-slate-300 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] relative overflow-hidden">
-        {/* Subtle glare */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-            <div className="lg:col-span-2 bg-white/5 backdrop-blur rounded-3xl p-8 border border-white/5">
-              <div className="flex items-center gap-3 mb-6 text-white">
-                <div className="w-12 h-12 bg-[#0D9488] rounded-xl flex items-center justify-center shadow-inner">
+      <footer className="w-full bg-[#F4F6F8] border-t border-slate-200/90 text-[#162836] pt-14 pb-8 mt-auto rounded-none">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-10">
+            <div className="lg:col-span-2">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 bg-[#162836] rounded-xl flex items-center justify-center">
                   <HeartPulse className="w-7 h-7 text-white" />
                 </div>
-                <span className="font-bold text-2xl tracking-tight">HealTrip AI</span>
+                <span className="font-heading font-extrabold text-2xl tracking-tight text-[#162836]">HealTrip AI</span>
               </div>
-              <p className="text-slate-400 font-normal leading-relaxed max-w-md text-lg">
+              <p className="text-slate-600 font-medium leading-relaxed max-w-md">
                 {t.footer.desc}
               </p>
             </div>
-            <div className="pt-4">
-              <h4 className="text-white font-bold mb-6 text-lg">{t.footer.links.navigation}</h4>
-              <ul className="space-y-4 font-semibold text-slate-400">
+            <div>
+              <h4 className="font-heading font-extrabold text-[#162836] mb-6 text-lg">{t.footer.links.navigation}</h4>
+              <ul className="space-y-4 font-medium text-slate-600">
                 <li><Link href="/" className="hover:text-[#0D9488] transition-colors">{isAr ? 'الرئيسية' : 'Home'}</Link></li>
                 <li><Link href="/chat" className="hover:text-[#0D9488] transition-colors">{isAr ? 'المساعد الذكي' : 'AI Assistant'}</Link></li>
               </ul>
             </div>
-            <div className="pt-4">
-              <h4 className="text-white font-bold mb-6 text-lg">{t.footer.links.providers}</h4>
-              <ul className="space-y-4 font-semibold text-slate-400">
+            <div>
+              <h4 className="font-heading font-extrabold text-[#162836] mb-6 text-lg">{t.footer.links.providers}</h4>
+              <ul className="space-y-4 font-medium text-slate-600">
                 <li><Link href="/register" className="hover:text-[#0D9488] transition-colors">{isAr ? 'تسجيل منشأة' : 'Register Facility'}</Link></li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm font-semibold text-slate-500">
+          <div className="border-t border-slate-200/80 mt-10 pt-6 text-sm font-medium text-slate-500 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>{t.footer.copyright}</div>
           </div>
         </div>
