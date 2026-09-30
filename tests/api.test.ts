@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
-import { app } from '../apps/api/src/server';
+import { app } from '../apps/api/src/app';
 
 describe('Chat API', () => {
   it('should return 400 for invalid request body', async () => {
