@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.next/
+.env
+.env.local
+
+# Internal AI development files
+IMPLEMENTATION_GUIDE.md
+AiSkills/
+.agents/
+AGENTS.md
+Prompt.md
+HealTrip AI Patient Decision Assistant.md
+HealTrip AI — Agent Engineering Rules.md
